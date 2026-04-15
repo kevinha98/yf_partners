@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YoungFinance Bergen — Sponsor Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yf-gold: #F6C928;
+    --warm-gold: #F3B12A;
+    --soft-gold: #F5E0B1;
+    --cream: #F7F3E7;
+    --dark: #2F2F2D;
+    --grey: #54595F;
+    --mid-grey: #7A7A7A;
+    --white: #FFFFFF;
+    --green: #61CE70;
+    --orange: #FF9800;
+    --red: #E53935;
+    --blue: #42A5F5;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    color: var(--dark);
+    background: var(--cream);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: 'Josefin Sans', sans-serif;
+    letter-spacing: -0.02em;
+  }
+  .header {
+    background: var(--dark);
+    color: var(--white);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header .logo {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--yf-gold); display: flex; align-items: center;
+    justify-content: center; font-family: 'Josefin Sans'; font-weight: 700;
+    font-size: 1.2rem; color: var(--dark);
+  }
+  .header h1 { font-size: 1.4rem; font-weight: 600; }
+  .header .subtitle { color: var(--mid-grey); font-size: 0.85rem; margin-left: auto; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 40px; }
+
+  /* KPI cards */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 32px;
+  }
+  .kpi-card {
+    background: var(--white); border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--yf-gold);
+  }
+  .kpi-card.warning::before { background: var(--orange); }
+  .kpi-card.danger::before { background: var(--red); }
+  .kpi-card.success::before { background: var(--green); }
+  .kpi-card.info::before { background: var(--blue); }
+  .kpi-number {
+    font-family: 'Josefin Sans'; font-size: 2rem; font-weight: 700; color: var(--dark);
+  }
+  .kpi-label { font-size: 0.75rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 4px; }
+  .kpi-change { font-size: 0.7rem; margin-top: 6px; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+  .kpi-change.down { background: #FFEBEE; color: var(--red); }
+  .kpi-change.up { background: #E8F5E9; color: #2E7D32; }
+
+  /* Sections */
+  .section { margin-bottom: 32px; }
+  .section-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  }
+  .section-header h2 { font-size: 1.2rem; font-weight: 600; }
+  .section-header .badge {
+    font-size: 0.7rem; padding: 3px 10px; border-radius: 6px;
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .badge-gold { background: var(--soft-gold); color: var(--dark); }
+  .badge-orange { background: #FFF3E0; color: var(--orange); }
+  .badge-green { background: #E8F5E9; color: #2E7D32; }
+  .badge-blue { background: #E3F2FD; color: #1565C0; }
+
+  /* Table */
+  .table-wrap {
+    background: var(--white); border-radius: 12px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th {
+    background: var(--dark); color: var(--white); padding: 12px 16px;
+    text-align: left; font-weight: 500; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  td { padding: 10px 16px; border-bottom: 1px solid #f0ede4; }
+  tr:hover td { background: #faf8f0; }
+  tr:last-child td { border-bottom: none; }
+
+  .status {
+    display: inline-block; padding: 3px 10px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 500; white-space: nowrap;
+  }
+  .status-signert { background: #E8F5E9; color: #2E7D32; }
+  .status-prove { background: var(--soft-gold); color: var(--dark); }
+  .status-forhandling { background: #FFF3E0; color: #E65100; }
+  .status-kontaktet { background: #E3F2FD; color: #1565C0; }
+  .status-lead { background: #F5F5F5; color: var(--grey); }
+  .status-utdatert { background: #EFEBE9; color: #795548; }
+  .status-prospekt { background: #FFF8E1; color: #F9A825; }
+  .status-oppsagt { background: #FFEBEE; color: var(--red); }
+
+  .amount { font-family: 'Josefin Sans'; font-weight: 600; white-space: nowrap; }
+  .company-name { font-weight: 500; color: var(--dark); }
+  .notes { color: var(--mid-grey); font-size: 0.8rem; max-width: 300px; }
+  .action { color: var(--warm-gold); font-weight: 400; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab {
+    padding: 8px 20px; border-radius: 8px 8px 0 0; background: var(--white);
+    border: none; cursor: pointer; font-family: 'Roboto'; font-size: 0.85rem;
+    color: var(--grey); transition: all 0.2s;
+  }
+  .tab.active { background: var(--dark); color: var(--white); }
+  .tab:hover:not(.active) { background: var(--soft-gold); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Alert banner */
+  .alert {
+    background: #FFF3E0; border-left: 4px solid var(--orange);
+    border-radius: 0 12px 12px 0; padding: 16px 24px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .alert-icon { font-size: 1.4rem; }
+  .alert-text strong { display: block; margin-bottom: 2px; }
+  .alert-text { font-size: 0.9rem; }
+
+  /* File links */
+  .files-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .file-card {
+    background: var(--white); border-radius: 12px; padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: default;
+  }
+  .file-card h3 { font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; }
+  .file-card p { font-size: 0.8rem; color: var(--grey); }
+  .file-card .path { font-size: 0.7rem; color: var(--mid-grey); font-family: monospace; margin-top: 8px; word-break: break-all; }
+
+  @media (max-width: 1024px) {
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    .files-grid { grid-template-columns: 1fr; }
+    .container { padding: 20px; }
+  }
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    table { font-size: 0.78rem; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">YF</div>
+  <h1>Sponsor Dashboard</h1>
+  <div class="subtitle">Oppdatert april 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- Alert -->
+  <div class="alert">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text">
+      <strong>Argentum og Gabler har sagt opp</strong>
+      Begge avtaler løper ut 31.12.2026. Fra 2027 mister vi 50 000 NOK/år (30K + 20K). Prioriter nye sponsorer.
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid">
+    <div class="kpi-card success">
+      <div class="kpi-number">10</div>
+      <div class="kpi-label">Aktive sponsorer</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-number">220K</div>
+      <div class="kpi-label">&Aring;rsinntekt (NOK)</div>
+      <div class="kpi-change">Sum &aring;rlig</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-number">2</div>
+      <div class="kpi-label">Sagt opp</div>
+    </div>
+    <div class="kpi-card" style="border-top:3px solid var(--yf-gold)">
+      <div class="kpi-number">7</div>
+      <div class="kpi-label">Dialog initiert</div>
+      <div class="kpi-change">Fana, Frende, Stacc m.fl.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-number">76</div>
+      <div class="kpi-label">Prospekter</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-number">97</div>
+      <div class="kpi-label">Total pipeline</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('active')">Aktive sponsorer</button>
+    <button class="tab" onclick="showTab('pipeline')">Pipeline & Prospekter</button>
+    <button class="tab" onclick="showTab('history')">Historikk</button>
+    <button class="tab" onclick="showTab('files')">Filer & Maler</button>
+  </div>
+
+  <!-- Tab: Aktive sponsorer -->
+  <div id="tab-active" class="tab-content active">
+    <div class="section">
+      <div class="section-header">
+        <h2>Aktive sponsoravtaler 2026</h2>
+        <span class="badge badge-green">10 aktive</span>
+        <span class="badge badge-orange">2 sagt opp</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Sponsor</th><th>Kontaktperson</th><th>Bel&oslash;p</th><th>Plasser</th><th>Status</th><th>Notater</th>
+          </tr>
+          <tr>
+            <td class="company-name">Finansforbundet</td>
+            <td>Luis Aleksander Andersen<br><small>R&aring;dgiver student</small></td>
+            <td class="amount">40 000</td><td>Ubegrenset</td>
+            <td><span class="status status-signert">Signert</span></td>
+            <td class="notes">Inng&aring;tt avtale desember 2025</td>
+          </tr>
+          <tr>
+            <td class="company-name">Tryg</td>
+            <td>Robin Sandal<br><small>Direkt&oslash;r i Kundedivisjon</small></td>
+            <td class="amount">30 000</td><td>Ubegrenset</td>
+            <td><span class="status status-signert">Signert</span></td>
+            <td class="notes">Meget god respons</td>
+          </tr>
+          <tr>
+            <td class="company-name">Deloitte</td>
+            <td>Eivind Hellandsvik Stana<br><small>Manager, Consulting</small></td>
+            <td class="amount">30 000</td><td>Ubegrenset</td>
+            <td><span class="status status-signert">Signert</span></td>
+            <td class="notes">Meget god respons</td>
+          </tr>
+          <tr>
+            <td class="company-name">DNB</td>
+            <td>Ingrid Gj&oslash;stein<br><small>Seniorr&aring;dgiver, Bedriftsmarked</small></td>
+            <td class="amount">30 000</td><td>Ubegrenset</td>
+            <td><span class="status status-signert">Signert</span></td>
+            <td class="notes">God respons. Linda Lein er hovedkontakt.</td>
+          </tr>
+          <tr>
+            <td class="company-name">Argentum</td>
+            <td>Linda Lein, Anita Rustan,<br>Jon Fredrik Vassengen</td>
+            <td class="amount">30 000</td><td>Ubegrenset</td>
+            <td><span class="status status-oppsagt">⚠️ Sagt opp</span></td>
+            <td class="notes">Sagt opp jan 2026. Avtale utg&aring;r des 2026. Meget god respons.</td>
+          </tr>
+          <tr>
+            <td class="company-name">Gabler</td>
+            <td>Aksel Bjerkvik<br><small>CEO Gabler AS</small></td>
+            <td class="amount">20 000</td><td>Ubegrenset</td>
+            <td><span class="status status-oppsagt">⚠️ Sagt opp</span></td>
+            <td class="notes">Sagt opp. Avtale ut desember 2026.</td>
+          </tr>
+          <tr>
+            <td class="company-name">Thommessen</td>
+            <td>Bj&oslash;rn Sande Urtegaard<br><small>Partner</small></td>
+            <td class="amount">20 000</td><td>5</td>
+            <td><span class="status status-signert">Signert</span></td>
+            <td class="notes">Lite/ingen respons. Ned til liten sponsorpakke (2026).</td>
+          </tr>
+          <tr>
+            <td class="company-name">Aider</td>
+            <td>Christer Bakke<br><small>Partner</small></td>
+            <td class="amount">20 000</td><td>5</td>
+            <td><span class="status status-signert">Signert</span></td>
+            <td class="notes">Meget god respons</td>
+          </tr>
+          <tr>
+            <td class="company-name">Sparebanken Norge</td>
+            <td>Tonje Marie Schreine<br><small>Markedsdirekt&oslash;r</small><br><small>tonje.schreiner@spv.no</small></td>
+            <td class="amount">&mdash;</td><td>&mdash;</td>
+            <td><span class="status status-signert">Sponsor</span></td>
+            <td class="notes">Tidl. Sparebanken Vest (hovedpartner). Lite respons. Oppdatert 2026.</td>
+          </tr>
+          <tr>
+            <td class="company-name">NCE Finance Innovation</td>
+            <td>Rea Parashar (CEO),<br>H&aring;kon Kl&oslash;ve-Graue Lavik</td>
+            <td class="amount">0</td><td>Ubegrenset</td>
+            <td><span class="status status-kontaktet">Kontaktet</span></td>
+            <td class="notes">Lite/ingen respons. Gratissamarbeid.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Pipeline -->
+  <div id="tab-pipeline" class="tab-content">
+
+    <!-- Dialog initiert -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Dialog initiert</h2>
+        <span class="badge badge-gold">7 selskaper</span>
+      </div>
+      <p style="color:var(--mid-grey);font-size:0.85rem;margin:-8px 0 16px 0;">Aktiv kontakt eller p&aring;g&aring;ende dialog. Kilde: Google Sheet sponsoroversikt apr 2026.</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Selskap</th><th>Bransje</th><th>Status</th><th>Kontakt</th><th>Ansvarlig</th></tr>
+          <tr>
+            <td class="company-name">Fana Sparebank</td><td>Bank</td>
+            <td><span class="status status-forhandling">P&aring;g&aring;ende dialog</span></td>
+            <td>Oyvind.Engan@fanasparebank.no</td><td>Amanda</td>
+          </tr>
+          <tr>
+            <td class="company-name">Frende Forsikring</td><td>Forsikring</td>
+            <td><span class="status status-forhandling">P&aring;g&aring;ende dialog</span></td>
+            <td>monica.kversoy@frende.no</td><td>&mdash;</td>
+          </tr>
+          <tr>
+            <td class="company-name">Stacc</td><td>Fintech</td>
+            <td><span class="status status-forhandling">Kontakt initiert</span></td>
+            <td>&mdash;</td><td>Sebastian</td>
+          </tr>
+          <tr>
+            <td class="company-name">Bulder Bank</td><td>Neobank/fintech</td>
+            <td><span class="status status-prospekt">Skeptisk</span></td>
+            <td>&mdash;</td><td>Sebastian</td>
+          </tr>
+          <tr>
+            <td class="company-name">Borea Asset Mgmt</td><td>Kapitalforvaltning</td>
+            <td><span class="status status-forhandling">Kontakt initiert</span></td>
+            <td>cf@borea.as</td><td>Kevin</td>
+          </tr>
+          <tr>
+            <td class="company-name">Norne Securities</td><td>Megling/analyse</td>
+            <td><span class="status status-prospekt">N&oslash;lende</span></td>
+            <td>jt@norne.no</td><td>&mdash;</td>
+          </tr>
+          <tr>
+            <td class="company-name">Horde</td><td>Fintech/investering</td>
+            <td><span class="status status-forhandling">Prospekt m/kontakt</span></td>
+            <td>marcus.hiiri@horde.no</td><td>&mdash;</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Utdaterte -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Utdaterte leads &mdash; trenger ny inngang</h2>
+        <span class="badge badge-orange">5 utdaterte</span>
+      </div>
+      <p style="color:var(--mid-grey);font-size:0.85rem;margin:-8px 0 16px 0;">Kontaktet i 2024 uten resultat. Gamle sponsorbrev er utdaterte &mdash; trenger ny kontaktperson og ny tiln&aelig;rming.</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Selskap</th><th>Bransje</th><th>Tidl. kontakt</th><th>Status</th><th>Neste steg</th></tr>
+          <tr>
+            <td class="company-name">Aritma</td><td>Fintech</td><td>Thor Kristian Seth</td>
+            <td><span class="status status-utdatert">Utdatert</span></td><td class="action">Finn ny kontakt via LinkedIn</td>
+          </tr>
+          <tr>
+            <td class="company-name">BDO</td><td>Konsulent/revisjon</td><td>—</td>
+            <td><span class="status status-utdatert">Utdatert</span></td><td class="action">Finn Bergen-kontor sponsoransvarlig</td>
+          </tr>
+          <tr>
+            <td class="company-name">EY</td><td>Konsulent/revisjon</td><td>—</td>
+            <td><span class="status status-utdatert">Utdatert</span></td><td class="action">Kontakt Bergen Employer Branding</td>
+          </tr>
+          <tr>
+            <td class="company-name">Stacc</td><td>Fintech</td><td>Eivind Kjellevold</td>
+            <td><span class="status status-utdatert">Utdatert</span></td><td class="action">Ny inngang via NCE Finance Innovation</td>
+          </tr>
+          <tr>
+            <td class="company-name">TF Bank</td><td>Bank</td><td>Markus Malmo</td>
+            <td><span class="status status-utdatert">Utdatert</span></td><td class="action">Research ny kontaktperson</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2>Nye prospekter</h2>
+        <span class="badge badge-gold">76 selskaper</span>
+      </div>
+      <p style="color:var(--mid-grey);font-size:0.85rem;margin:-8px 0 16px 0;">Synkronisert med Google Sheet apr 2026. Viser utvalg &mdash; fullstendig liste i sponsor-pipeline.xlsx.</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Selskap</th><th>Bransje</th><th>Neste aksjon</th><th>Notater</th></tr>
+          <tr><td class="company-name">PwC</td><td>Konsulent/revisjon</td><td class="action">Re-engage</td><td class="notes">Tidligere sponsor (95K). Eneste Big4 som mangler.</td></tr>
+          <tr><td class="company-name">Holberg Fondsforvaltning</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Bergen-basert fondsforvalter.</td></tr>
+          <tr><td class="company-name">Bulder Bank</td><td>Neobank/fintech</td><td class="action">Research kontakt</td><td class="notes">NCE FI-medlem. Hostet Kick-Off 2023.</td></tr>
+          <tr><td class="company-name">Schjødt</td><td>Advokatfirma</td><td class="action">Research kontakt</td><td class="notes">Norges nest største. Bergen-kontor.</td></tr>
+          <tr><td class="company-name">Wikborg Rein</td><td>Advokatfirma</td><td class="action">Research kontakt</td><td class="notes">Ledende forretningsadvokatfirma. Bergen.</td></tr>
+          <tr><td class="company-name">SpareBank 1 SR-Bank</td><td>Bank</td><td class="action">Research kontakt</td><td class="notes">Vestlandets nest største bank.</td></tr>
+          <tr><td class="company-name">Handelsbanken</td><td>Bank</td><td class="action">Research kontakt</td><td class="notes">Svensk bank, Bergen-kontor.</td></tr>
+          <tr><td class="company-name">Pareto Securities</td><td>Megling/IB</td><td class="action">Research kontakt</td><td class="notes">Norges største uavhengige meglerhus.</td></tr>
+          <tr><td class="company-name">Storebrand</td><td>Forsikring/pensjon</td><td class="action">Research kontakt</td><td class="notes">Ledende på pensjon og forsikring.</td></tr>
+          <tr><td class="company-name">Gjensidige</td><td>Forsikring</td><td class="action">Research kontakt</td><td class="notes">Norges største skadeforsikring.</td></tr>
+          <tr><td class="company-name">KLP</td><td>Pensjon</td><td class="action">Research kontakt</td><td class="notes">Norges største pensjonsselskap.</td></tr>
+          <tr><td class="company-name">SKAGEN Fondene</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Stor uavhengig fondsforvalter.</td></tr>
+          <tr><td class="company-name">Borea Asset Management</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Bergen-basert kapitalforvalter.</td></tr>
+          <tr><td class="company-name">Fondsfinans</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Uavhengig kapitalforvaltning.</td></tr>
+          <tr><td class="company-name">BAHR</td><td>Advokatfirma</td><td class="action">Research kontakt</td><td class="notes">Topp-tier advokatfirma.</td></tr>
+          <tr><td class="company-name">Capgemini</td><td>IT-konsulent</td><td class="action">Research kontakt</td><td class="notes">Global IT-konsulent, Bergen-kontor.</td></tr>
+          <tr><td class="company-name">Accenture</td><td>Konsulent</td><td class="action">Research kontakt</td><td class="notes">Global konsulent.</td></tr>
+          <tr><td class="company-name">Visma</td><td>Tech/ERP</td><td class="action">Research kontakt</td><td class="notes">Nordens største programvareselskap.</td></tr>
+          <tr><td class="company-name">Itera</td><td>IT-konsulent</td><td class="action">Research kontakt</td><td class="notes">Nordisk tech-konsulent. Bergen.</td></tr>
+          <tr><td class="company-name">Huddlestock Fintech</td><td>Fintech</td><td class="action">Research kontakt</td><td class="notes">Bergen-basert, investeringsplattform.</td></tr>
+          <tr><td class="company-name">Zwipe</td><td>Fintech</td><td class="action">Research kontakt</td><td class="notes">Biometrisk betalingsteknologi.</td></tr>
+          <tr><td class="company-name">Aprila Bank</td><td>Fintech/bank</td><td class="action">Research kontakt</td><td class="notes">Digital bedriftsbank. NCE FI-medlem.</td></tr>
+          <tr><td class="company-name">Brage Finans</td><td>Finans</td><td class="action">Research kontakt</td><td class="notes">Bergen-basert. NCE FI-medlem.</td></tr>
+          <tr><td class="company-name">Aptic</td><td>Fintech</td><td class="action">Research kontakt</td><td class="notes">Lending-plattform. NCE FI-medlem.</td></tr>
+          <tr><td class="company-name">DNB Næringseiendom</td><td>Eiendom/finans</td><td class="action">Research kontakt</td><td class="notes">Eiendomsinvesteringer.</td></tr>
+          <tr><td class="company-name">TietoEvry</td><td>IT/konsulent</td><td class="action" style="color:#61CE70;">&#9989; E-post sendt 15. apr</td><td class="notes">Nordisk IT-gigant. Sendt til geir.remman@tieto.com, CC: jan.ove.haugstad@tieto.com</td></tr>
+          <tr><td colspan="4" style="background:var(--cream);font-weight:500;font-size:0.8rem;color:var(--grey);padding:10px 16px;">Fra Google Sheet &mdash; nye prospekter (apr 2026)</td></tr>
+          <tr><td class="company-name">Fana Sparebank</td><td>Bank</td><td class="action">F&oslash;lg opp dialog</td><td class="notes">P&aring;g&aring;ende dialog jan 2026. Amanda.</td></tr>
+          <tr><td class="company-name">Frende Forsikring</td><td>Forsikring</td><td class="action">F&oslash;lg opp dialog</td><td class="notes">P&aring;g&aring;ende dialog jan 2026.</td></tr>
+          <tr><td class="company-name">Norwegian Hull Club</td><td>Forsikring/sj&oslash;fart</td><td class="action">Research kontakt</td><td class="notes">Markus ansvarlig.</td></tr>
+          <tr><td class="company-name">Danske Bank</td><td>Bank</td><td class="action">Research kontakt</td><td class="notes">Nordisk storbank.</td></tr>
+          <tr><td class="company-name">Horde</td><td>Fintech/investering</td><td class="action">Send sponsorbrev</td><td class="notes">marcus.hiiri@horde.no</td></tr>
+          <tr><td class="company-name">Bouvet</td><td>IT-konsulent</td><td class="action">Research kontakt</td><td class="notes">Norsk IT-konsulent.</td></tr>
+          <tr><td class="company-name">Azets</td><td>Regnskap/r&aring;dgivning</td><td class="action">Research kontakt</td><td class="notes">Kompetansehus.</td></tr>
+          <tr><td class="company-name">Axa</td><td>Forsikring</td><td class="action">Research kontakt</td><td class="notes">Internasjonal forsikring.</td></tr>
+          <tr><td class="company-name">Formue</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Uavhengig form&aring;lsforvaltning.</td></tr>
+          <tr><td class="company-name">NHH Alumni</td><td>Nettverk/utdanning</td><td class="action">Send invitasjon</td><td class="notes">morten.hilt@nhh.no</td></tr>
+          <tr><td colspan="4" style="background:var(--cream);font-weight:500;font-size:0.8rem;color:var(--grey);padding:10px 16px;">Historiske / re-engagement (Google Sheet)</td></tr>
+          <tr><td class="company-name">Saga Corporate Finance</td><td>Corporate finance</td><td class="action">Send generisk mail</td><td class="notes">Kan f&aring; generisk mail.</td></tr>
+          <tr><td class="company-name">HammervollPind</td><td>Advokatfirma</td><td class="action">Research kontakt</td><td class="notes">Bergen-kontor.</td></tr>
+          <tr><td class="company-name">Bergen Capital Mgmt</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Bergen-basert.</td></tr>
+          <tr><td class="company-name">Grieg Investor</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Bergen-basert Grieg-sfæren.</td></tr>
+          <tr><td class="company-name">Atlantis Vest</td><td>Kapitalforvaltning</td><td class="action">Research kontakt</td><td class="notes">Vestlandsbasert.</td></tr>
+          <tr><td class="company-name">Sarsia Seed</td><td>Venture/seed</td><td class="action">Research kontakt</td><td class="notes">Bergen-basert s&aring;kornfond.</td></tr>
+          <tr><td class="company-name">Voss Sparebank</td><td>Bank</td><td class="action">Research kontakt</td><td class="notes">Vestlandsbank.</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: History -->
+  <div id="tab-history" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>Historiske sponsorer</h2>
+        <span class="badge badge-orange">9 tidligere</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Sponsor</th><th>Bransje</th><th>Historisk beløp</th><th>Siste aktive</th><th>Re-engagement</th><th>Notater</th></tr>
+          <tr>
+            <td class="company-name">Argentum</td><td>Kapitalforvaltning</td>
+            <td class="amount">30 000/år</td><td>2026</td>
+            <td><span class="status status-forhandling">Middels</span></td>
+            <td class="notes">Hovedsponsor siden ~2017. Sagt opp jan 2026, avtale utg&aring;r des 2026.</td>
+          </tr>
+          <tr>
+            <td class="company-name">Gabler</td><td>Kapitalforvaltning</td>
+            <td class="amount">20 000/år</td><td>2026</td>
+            <td><span class="status status-forhandling">Middels</span></td>
+            <td class="notes">Sagt opp. Avtale ut desember 2026.</td>
+          </tr>
+          <tr>
+            <td class="company-name">PwC</td><td>Konsulent/revisjon</td>
+            <td class="amount">95 000</td><td>~2018</td>
+            <td><span class="status status-oppsagt">Høy</span></td>
+            <td class="notes">Var største sponsor. Eneste Big4 som mangler.</td>
+          </tr>
+          <tr>
+            <td class="company-name">EY</td><td>Konsulent/revisjon</td>
+            <td class="amount">15 000</td><td>~2018</td>
+            <td><span class="status status-oppsagt">Høy</span></td>
+            <td class="notes">Sponsorbrev sendt. Alle andre Big4 inne.</td>
+          </tr>
+          <tr>
+            <td class="company-name">Monobank</td><td>Bank/fintech</td>
+            <td class="amount">25 000</td><td>~2018</td>
+            <td><span class="status status-prove">Middels</span></td>
+            <td class="notes">Fintech-bank.</td>
+          </tr>
+          <tr>
+            <td class="company-name">Odin Forvaltning</td><td>Kapitalforvaltning</td>
+            <td class="amount">10 000</td><td>~2018</td>
+            <td><span class="status status-prove">Middels</span></td>
+            <td class="notes">Fondsforvalter.</td>
+          </tr>
+          <tr>
+            <td class="company-name">Skandiabanken</td><td>Bank</td>
+            <td class="amount">30 000</td><td>~2018</td>
+            <td><span class="status status-lead">Lav</span></td>
+            <td class="notes">Eksisterer ikke (nå Sbanken/DNB).</td>
+          </tr>
+          <tr>
+            <td class="company-name">Sparebanken Vest</td><td>Bank</td>
+            <td class="amount">30 000</td><td>~2018</td>
+            <td><span class="status status-signert">N/A</span></td>
+            <td class="notes">N&aring; Sparebanken Norge &mdash; allerede aktiv.</td>
+          </tr>
+          <tr>
+            <td class="company-name">KPMG</td><td>Konsulent/revisjon</td>
+            <td class="amount">15 000</td><td>2025</td>
+            <td><span class="status status-prove">Middels</span></td>
+            <td class="notes">Pr&oslash;veperiode utl&oslash;pt 31.12.2025. Ikke fornyet.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Files -->
+  <div id="tab-files" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>Sponsorsystem — Filer</h2>
+      </div>
+      <div class="files-grid">
+        <div class="file-card">
+          <h3>📊 Sponsor Pipeline</h3>
+          <p>Excel-fil med 97 selskaper, 3 ark (Pipeline, Aktive, Historikk)</p>
+          <div class="path">Sponsorsystem/sponsor-pipeline.xlsx</div>
+        </div>
+        <div class="file-card">
+          <h3>📖 Knowledge Base</h3>
+          <p>Komplett referansedokument — 300+ linjer</p>
+          <div class="path">Sponsorsystem/knowledge-base.md</div>
+        </div>
+        <div class="file-card">
+          <h3>🎨 Pitch Deck (HTML)</h3>
+          <p>8-slide prototype med YF-branding</p>
+          <div class="path">Sponsorsystem/pitch-deck.html</div>
+        </div>
+        <div class="file-card">
+          <h3>📝 Pitch Deck (tekst)</h3>
+          <p>Tekstinnhold for Canva-produksjon</p>
+          <div class="path">Sponsorsystem/pitch-deck-innhold.md</div>
+        </div>
+        <div class="file-card">
+          <h3>✉️ E-postmaler (7 stk)</h3>
+          <p>Generell, fintech, konsulent, bank, re-engagement, oppfølging, takk</p>
+          <div class="path">Sponsorsystem/maler/</div>
+        </div>
+        <div class="file-card">
+          <h3>⚙️ Utkast-generator</h3>
+          <p>Python-script — genererer 33 personaliserte utkast</p>
+          <div class="path">Sponsorsystem/generer-utkast.py</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
